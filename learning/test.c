@@ -11,8 +11,8 @@
 
 #define PORT 80
 
-const char schost[]="www.google.com";
-
+const char schost[]="www.stackoverflow.com";
+const char url[]="hi";
 int main(){
 
   WSADATA wsaData;
@@ -34,7 +34,7 @@ int main(){
   if(connect(sock,(const struct sockaddr *)&sin,sizeof(sin))!=0)
     printf("connect error"),ExitProcess(EXIT_FAILURE);
 
-  const char scmsg[]="HEAD/HTTP/1.0\r\n\r\n";
+  const char scmsg[]="GET / HTTP/1.1\r\nHost: www.stackoverflow.com \r\nConnection: close\r\n\r\n";
   if(send(sock,scmsg,sizeof(scmsg),0)>sizeof(scmsg))
     printf("send error%d",sizeof(scmsg)),ExitProcess(EXIT_FAILURE);
 
