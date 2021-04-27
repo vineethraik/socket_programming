@@ -1,20 +1,11 @@
-#pragma comment(lib,"-lws2_32.lib")
-#include <winsock2.h>
-#include <winsock.h>
-#include<sys/types.h>
-#include<mstcpip.h>
-#include<stdio.h>
-#include<stdlib.h>
-#include<conio.h>
-#include<windows.h>
+
+#include"network.h"
+
+
 int count=0,t1=0;
 struct sockaddr_in source,dest;
 
-#define SIO_RCVALL _WSAIOW(IOC_VENDOR,1)
 
-int capture(SOCKET);
-
-void analysepacket(char*,int);
  
 int sock,i,j;
 int main(){
@@ -82,36 +73,3 @@ int main(){
 }
 
 
-int capture(SOCKET sock)
-{
-	char *Buffer = (char *)malloc(65536); //Its Big!
-	int packetsize;
-	
-
-	if (Buffer == NULL)
-	{
-		printf("malloc() failed.\n");
-		return 0;
-	}
-
-	do
-	{
-		
-		packetsize = recvfrom(sock , Buffer , 65536 , 0 , 0 , 0); //Eat as much as u can
-		
-
-		if(packetsize > 0)
-		{
-            t1++;
-			//analysepacket(Buffer, packetsize);
-            printf("\r packet no %d",t1);
-		}
-		else
-		{
-			printf( "recvfrom() failed.\n");
-		}
-	}
-	while (packetsize > 0);
-
-	free(Buffer);
-}
