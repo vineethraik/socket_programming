@@ -7,7 +7,8 @@ struct sockaddr_in source,dest;
 
 
  
-int sock,i,j;
+int i,j;
+SOCKET sock;
 int main(){
     char hostname[100];
     struct hostent *local;
@@ -62,7 +63,7 @@ int main(){
 		return 1;
 	}
 
-    capture((SOCKET) sock);
+    capture(sock);
 
 
 
