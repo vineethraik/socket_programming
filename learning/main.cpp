@@ -2,7 +2,7 @@
 #include"network.h"
 
 
-int count=0,t1=0;
+int count=0;
 struct sockaddr_in source,dest;
 
 
