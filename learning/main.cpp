@@ -16,7 +16,7 @@ int main(){
 
     int in;
 
-    //wsa startup
+    //wsa startup mandatary step for opening socket
     WSADATA wsaData;
     WORD dllversion=MAKEWORD(2,1);
     if(( i=WSAStartup(dllversion,&wsaData))!=0)printf("wsa startup error %d",i), ExitProcess(EXIT_FAILURE);
@@ -73,7 +73,9 @@ int main(){
     capture_info c_info;
     data d;
     memcpy(&d.host.s_addr,local->h_addr_list[in],sizeof(d.host.s_addr));
-    while(1){
+    j=0;
+    while(j<10000){
+        j++;
         c_d=capture(sock);
 
         int protocol=get_protocol(c_d);
