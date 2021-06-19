@@ -8,9 +8,10 @@
 #include<vector>
 #include<string>
 
-
+// include -lWs2_32 in g++
 
 #define SIO_RCVALL _WSAIOW(IOC_VENDOR,1)
+
 
 int t1=0,i;
 
@@ -126,6 +127,59 @@ typedef struct udp_hdr
 
 
 /*******************************class declaration**************************************/
+/*******************************class portlist**************************************/
+class portlist{
+private:
+vector<int> port;
+vector<string> serv;
+public:
+portlist();
+string getservice(int port);
+};
+
+portlist::portlist(){
+port.clear();
+serv.clear();
+port.push_back(53);
+serv.push_back("DNS");
+port.push_back(67);
+serv.push_back("BOOTP");
+port.push_back(68);
+serv.push_back("BOOTP");
+port.push_back(80);
+serv.push_back("HTTP");
+port.push_back(137);
+serv.push_back("NetBIOS");
+port.push_back(138);
+serv.push_back("NetBIOS");
+port.push_back(139);
+serv.push_back("NetBIOS");
+port.push_back(443);
+serv.push_back("HTTPS");
+port.push_back(1900);
+serv.push_back("SSDP");
+port.push_back(5353);
+serv.push_back("mDNS");
+port.push_back(5355);
+serv.push_back("LLMNR");
+
+}
+
+string portlist::getservice(int pt){
+    int temp=-1;
+   for(int i=0;i<port.size();i++){
+       if(pt==port.at(i)){
+           temp=i;
+       }
+   }
+   if(temp==-1){
+       return "undefined";
+   }else{
+       return serv.at(temp);
+   }
+
+
+}
 /*******************************class capture_info**************************************/
 class capture_info{
     public:
@@ -191,6 +245,22 @@ class store{
     friend class data;
 };
 
+/*******************************class declaration**************************************/
+
+class info{
+    private:
+    vector<string> serv;
+    vector<int> p_count;
+    vector<int> d_count;
+    int total_p_count;
+    int total_d_count;
+    public:
+    info();
+    void print();
+
+};
+
+
 /*******************************CLASS  data**************************************/
 
 class data{
@@ -198,9 +268,10 @@ class data{
     int len;
     int packet_count;
     vector<store> stores;
+    vector<addr> undefined;
     public:
     in_addr host;
-    data(){len=0;packet_count=0;stores.clear();}
+    data(){len=0;packet_count=0;stores.clear();undefined.clear();}
     void copy(data d){len=d.len;stores=d.stores;packet_count=d.packet_count;}
     void add(int,int,in_addr,in_addr,int);
     void print();
@@ -212,20 +283,24 @@ void data::add(int ports,int portd,in_addr adr_s,in_addr adr_d,int packetsize){
     packet_count++;
     store st;
     addr adrs;
+    portlist pt;
+    string serv;
     if(len==0){
         
         if(ports>portd){
             st.port=ports;
+            serv=pt.getservice(portd);
         }
         else{
             st.port=portd;
+            serv=pt.getservice(ports);
         }
         adrs.dest=adr_d;
         adrs.src=adr_s;
         adrs.packet_size=packetsize;
         adrs.portd=portd;
         adrs.ports=ports;
-        adrs.servicename=get_service_by_port(ports,portd);
+        adrs.servicename=serv;
         //adrs.servicename=(inet_ntoa(host)==inet_ntoa(adr_s))?getservicebyport(ports):getservicebyport(portd);
         st.adr.push_back(adrs);
         st.len++;
@@ -233,7 +308,15 @@ void data::add(int ports,int portd,in_addr adr_s,in_addr adr_d,int packetsize){
         stores.push_back(st);
         
     }else{
-        int port=(portd>ports)?portd:ports;
+        int port;
+        if(ports>portd){
+            port=ports;
+            serv=pt.getservice(portd);
+        }
+        else{
+            port=portd;
+            serv=pt.getservice(ports);
+        }
         for(i=0;i<len;i++){
             if(port==stores.at(i).port){
                 adrs.dest=adr_d;
@@ -241,7 +324,7 @@ void data::add(int ports,int portd,in_addr adr_s,in_addr adr_d,int packetsize){
                 adrs.packet_size=packetsize;
                 adrs.portd=portd;
                 adrs.ports=ports;
-                adrs.servicename=get_service_by_port(ports,portd);
+                adrs.servicename=serv;
                 //adrs.servicename=(inet_ntoa(host)==inet_ntoa(adr_s))?getservicebyport(ports):getservicebyport(portd);
                 stores.at(i).adr.push_back(adrs);
                 stores.at(i).len++;
@@ -257,7 +340,7 @@ void data::add(int ports,int portd,in_addr adr_s,in_addr adr_d,int packetsize){
             adrs.packet_size=packetsize;
             adrs.portd=portd;
             adrs.ports=ports;
-            adrs.servicename=get_service_by_port(ports,portd);
+            adrs.servicename=serv;
             //adrs.servicename=(inet_ntoa(host)==inet_ntoa(adr_s))?getservicebyport(ports):getservicebyport(portd);
             st.adr.push_back(adrs);
             st.len++;
@@ -267,9 +350,9 @@ void data::add(int ports,int portd,in_addr adr_s,in_addr adr_d,int packetsize){
         }
     }
     
-
-    
-
+    if(serv=="undefined"){
+        undefined.push_back(adrs);
+    }
 }
 
 void  data::print(){
@@ -449,47 +532,6 @@ string getservicebyport(int port){
 
 /*******************************function get_service_by_port**************************************/
 
-string get_service_by_port(int port1,int port2){
-    string temp;
-    temp="undefined";
-    switch(port1){
-        case 53:
-        temp="DNS";
-        break;
-        case 80:
-        temp="HTTP";
-        break;
-        case 137:
-        temp="NetBIOS";
-        break;
-        case 443:
-        temp="HTTPS";
-        break;
-        case 5353:
-        temp="HTTPS";
-        break;
-    }
-    switch(port2){
-        case 53:
-        temp="DNS";
-        break;
-        case 80:
-        temp="HTTP";
-        break;
-        case 137:
-        temp="NetBIOS";
-        break;
-        case 443:
-        temp="HTTPS";
-        break;
-        case 5353:
-        temp="HTTPS";
-        break;
-    }
-
-    
-    return temp;
-}
 
 /*******************************function get_service_by_port**************************************/
 

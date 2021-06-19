@@ -7,7 +7,7 @@ struct sockaddr_in source,dest;
 
 data d;
  
-int i,j;
+int j;
 SOCKET sock;
 int main(){
     char hostname[100];
@@ -74,7 +74,13 @@ int main(){
     data d;
     memcpy(&d.host.s_addr,local->h_addr_list[in],sizeof(d.host.s_addr));
     j=0;
-    while(j<10000){
+
+    //cout<<exec("ipconfig")<<"\n";
+    //cout<<exec("hostname")<<"\n";
+
+
+    
+    while(!kbhit()){
         j++;
         c_d=capture(sock);
 
@@ -89,11 +95,11 @@ int main(){
         c_info.igmp++;
         case 6:
         c_info.tcp++;
-        gettcpdata(c_d,d);
+        gettcpdata(c_d,&d);
         break;
         case 17:
         c_info.udp++;
-        getudpdata(c_d,d);
+        getudpdata(c_d,&d);
         break;
         default:
         c_info.other++;
@@ -101,8 +107,11 @@ int main(){
         }
         c_info.print();
     }
-    
 
+    cout<<"\n";
+    d.sort();
+    d.save_to_file("log.txt");
+    d.print();
 
     closesocket(sock);
 	WSACleanup();
