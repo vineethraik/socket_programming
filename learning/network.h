@@ -1,5 +1,6 @@
 #pragma comment(lib,"-lws2_32.lib")
 #include <winsock2.h>
+#include<windows.h>
 #include<stdio.h>
 #include<iostream>
 #include<stdlib.h>
@@ -7,9 +8,10 @@
 #include<conio.h>
 #include<vector>
 #include<string>
+#include<malloc.h>
 
 // include -lWs2_32 in g++
-
+// last seen 
 #define SIO_RCVALL _WSAIOW(IOC_VENDOR,1)
 
 
@@ -20,7 +22,7 @@ using namespace std;
 
 string exec(const char* cmd) {
     char buffer[128];
-    std::string result = "";
+    string result = "";
     FILE* pipe = popen(cmd, "r");
     if (!pipe) throw std::runtime_error("popen() failed!");
     try {
@@ -35,13 +37,53 @@ string exec(const char* cmd) {
     return result;
 }
 
+
+void cls(HANDLE hConsole)
+{
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    SMALL_RECT scrollRect;
+    COORD scrollTarget;
+    CHAR_INFO fill;
+
+    // Get the number of character cells in the current buffer.
+    if (!GetConsoleScreenBufferInfo(hConsole, &csbi))
+    {
+        return;
+    }
+
+    // Scroll the rectangle of the entire buffer.
+    scrollRect.Left = 0;
+    scrollRect.Top = 0;
+    scrollRect.Right = csbi.dwSize.X;
+    scrollRect.Bottom = csbi.dwSize.Y;
+
+    // Scroll it upwards off the top of the buffer with a magnitude of the entire height.
+    scrollTarget.X = 0;
+    scrollTarget.Y = (SHORT)(0 - csbi.dwSize.Y);
+
+    // Fill with empty spaces with the buffer's default text attribute.
+    fill.Char.UnicodeChar = TEXT(' ');
+    fill.Attributes = csbi.wAttributes;
+
+    // Do the scroll
+    ScrollConsoleScreenBuffer(hConsole, &scrollRect, NULL, scrollTarget, &fill);
+
+    // Move the cursor to the top left corner too.
+    csbi.dwCursorPosition.X = 0;
+    csbi.dwCursorPosition.Y = 0;
+
+    SetConsoleCursorPosition(hConsole, csbi.dwCursorPosition);
+}
+
 /*******************************class and function declaration**************************************/
 
-
+class portlist;
 class addr;
 class store;
+class info;
 class data;
 class capture_data;
+
 
 capture_data capture(SOCKET);
 int get_protocol(capture_data);
@@ -140,6 +182,8 @@ string getservice(int port);
 portlist::portlist(){
 port.clear();
 serv.clear();
+port.push_back(21);
+serv.push_back("FTP");
 port.push_back(53);
 serv.push_back("DNS");
 port.push_back(67);
@@ -158,10 +202,13 @@ port.push_back(443);
 serv.push_back("HTTPS");
 port.push_back(1900);
 serv.push_back("SSDP");
+port.push_back(3702);
+serv.push_back("WSD"); //web service dinamic discovery
 port.push_back(5353);
 serv.push_back("mDNS");
 port.push_back(5355);
 serv.push_back("LLMNR");
+
 
 }
 
@@ -203,7 +250,7 @@ capture_info::capture_info(){
 }
 
 void capture_info::print(){
-printf("\r|TCP : %d |UDP : %d |ICMP : %d |IGMP : %d |OTHER %d |TOTAL %d",tcp,udp,icmp,igmp,other,total);
+printf("|TCP : %d |UDP : %d |ICMP : %d |IGMP : %d |OTHER %d |TOTAL %d",tcp,udp,icmp,igmp,other,total);
 }
 
 /*******************************class capture_data**************************************/
@@ -256,10 +303,53 @@ class info{
     int total_d_count;
     public:
     info();
+    void add(string,int);
     void print();
 
+    friend class data;
 };
 
+info::info(){
+    serv.clear();
+    p_count.clear();
+    d_count.clear();
+    total_d_count=0;
+    total_p_count=0;
+}
+
+void info::add(string service,int data_size){
+    bool temp=true;
+    total_p_count++;
+    total_d_count+=data_size;
+    for(int i=0;i<serv.size();i++){
+        if(serv[i]==service){
+            p_count[i]++;
+            d_count[i]+=data_size;
+            temp=false;
+            break;
+        }
+    }
+    if(temp){
+        serv.push_back(service);
+        p_count.push_back(1);
+        d_count.push_back(data_size);
+    }
+    
+    
+
+
+}
+
+void info::print(){
+    if(!serv.size()==0){
+    printf("\n\t packet\t\t data\n");
+    printf("*****************************************************************************************\n");
+    }
+    for(int i=0;i<serv.size();i++){
+        printf("%s\t%.1f%%\t\t%.1f%%\n",serv[i].c_str(),100*p_count[i]/(float)total_p_count,100*d_count[i]/(float)total_d_count);
+        printf("*****************************************************************************************\n");
+    }
+}
 
 /*******************************CLASS  data**************************************/
 
@@ -270,11 +360,13 @@ class data{
     vector<store> stores;
     vector<addr> undefined;
     public:
+    info inf;
     in_addr host;
     data(){len=0;packet_count=0;stores.clear();undefined.clear();}
     void copy(data d){len=d.len;stores=d.stores;packet_count=d.packet_count;}
     void add(int,int,in_addr,in_addr,int);
     void print();
+    void print_undefined();
     void sort();
     void save_to_file(string);
 } ;
@@ -349,13 +441,14 @@ void data::add(int ports,int portd,in_addr adr_s,in_addr adr_d,int packetsize){
 
         }
     }
+    inf.add(serv,packetsize);
     
     if(serv=="undefined"){
         undefined.push_back(adrs);
     }
 }
 
-void  data::print(){
+void data::print(){
     for(int i=0;i<stores.size();i++){
         cout<<"************************************************************************\n";
         cout<<stores.at(i).port<<":\n";
@@ -368,6 +461,19 @@ void  data::print(){
             cout<<" |service :"<<stores.at(i).adr.at(j).servicename;
             cout<<"\n";
         }
+        cout<<"\n";
+    }
+}
+
+void data::print_undefined(){
+    for(int i=0;i<undefined.size();i++){
+        printf("*****************************************************************\n");
+        cout<<"|source:"<<inet_ntoa(undefined.at(i).src);
+        cout<<" |destination:"<<inet_ntoa(undefined.at(i).dest);
+        cout<<" |source port:"<<undefined.at(i).ports;
+        cout<<" |destination port:"<<undefined.at(i).portd;
+        cout<<" |packet size:"<<undefined.at(i).packet_size;
+        cout<<" |service :"<<undefined.at(i).servicename;
         cout<<"\n";
     }
 }
@@ -421,28 +527,22 @@ capture_data capture(SOCKET sock)
 {
 	capture_data c_d;
 	
-
 	if (c_d.buffer == NULL)
 	{
 		printf("malloc() failed.\n");
 		exit(0);
 	}
 
-	
-	
 		while(1){
-		c_d.packet_size = recvfrom(sock , c_d.buffer , 65536 , 0 , 0 , 0); //Eat as much as u can
+		c_d.packet_size = recvfrom(sock , c_d.buffer , 65536 , 0 , 0 , 0);
 		
-
 		if(c_d.packet_size > 0)
-		{
-            
+		{  
             return c_d;
 		}
 		else
 		{
 			printf( "recvfrom() failed.\n");
-            
 		}
         }
 	
@@ -451,7 +551,6 @@ capture_data capture(SOCKET sock)
 
 /*******************************function get_protocol**************************************/
 
-
 int get_protocol(capture_data d){
     IPV4_HDR *iphdr;
     iphdr=(IPV4_HDR *)d.buffer;
@@ -459,7 +558,6 @@ int get_protocol(capture_data d){
     return iphdr->ip_protocol;
 
 }
-
 
 /*******************************function gettcpdata**************************************/
 
@@ -531,9 +629,3 @@ string getservicebyport(int port){
 }
 
 /*******************************function get_service_by_port**************************************/
-
-
-/*******************************function get_service_by_port**************************************/
-
-/*******************************function get_protocol**************************************/
-

@@ -10,6 +10,11 @@ data d;
 int j;
 SOCKET sock;
 int main(){
+    //
+    HANDLE hStdout;
+    hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
+
+
     char hostname[100];
     struct hostent *local;
     struct in_addr addr;
@@ -78,6 +83,10 @@ int main(){
     //cout<<exec("ipconfig")<<"\n";
     //cout<<exec("hostname")<<"\n";
 
+   
+    
+
+cls(hStdout);
 
     
     while(!kbhit()){
@@ -105,17 +114,20 @@ int main(){
         c_info.other++;
         break;
         }
+        cls(hStdout);
+       //printf("\033[%d;%dH", 0, 0);
         c_info.print();
+        d.inf.print();
+        //d.print_undefined();
     }
 
     cout<<"\n";
     d.sort();
-    d.save_to_file("log.txt");
-    d.print();
+    //d.save_to_file("log.txt");
+    //d.print();
 
     closesocket(sock);
 	WSACleanup();
-
 	return 0;
 }
 
