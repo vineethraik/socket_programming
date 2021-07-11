@@ -117,14 +117,15 @@ cls(hStdout);
         cls(hStdout);
        //printf("\033[%d;%dH", 0, 0);
         c_info.print();
-        d.inf.print();
+       // d.inf.print();
         //d.print_undefined();
+    
     }
 
     cout<<"\n";
-    d.sort();
+    //d.sort();
     //d.save_to_file("log.txt");
-    //d.print();
+    d.print();
 
     closesocket(sock);
 	WSACleanup();

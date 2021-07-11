@@ -14,11 +14,9 @@
 // last seen 
 #define SIO_RCVALL _WSAIOW(IOC_VENDOR,1)
 
-
 int t1=0,i;
 
 using namespace std;
-
 
 string exec(const char* cmd) {
     char buffer[128];
@@ -36,7 +34,6 @@ string exec(const char* cmd) {
     pclose(pipe);
     return result;
 }
-
 
 void cls(HANDLE hConsole)
 {
@@ -84,7 +81,6 @@ class info;
 class data;
 class capture_data;
 
-
 capture_data capture(SOCKET);
 int get_protocol(capture_data);
 void gettcpdata(capture_data,data*);
@@ -92,9 +88,7 @@ void getudpdata(capture_data,data*);
 string getservicebyport(int);
 string get_service_by_port(int,int);
 
-
 /*******************************IP headder**************************************/
-
 
 typedef struct ip_hdr
 {
@@ -119,9 +113,7 @@ typedef struct ip_hdr
 	unsigned int ip_destaddr; // Source address
 } IPV4_HDR;
 
-
 /*******************************TCP headder**************************************/
-
 
 typedef struct tcp_header
 {
@@ -154,10 +146,7 @@ typedef struct tcp_header
 	unsigned short urgent_pointer; // urgent pointer
 } TCP_HDR;
 
-
-
 /*******************************UDP headder**************************************/
-
 
 typedef struct udp_hdr
 {
@@ -167,9 +156,9 @@ typedef struct udp_hdr
 	unsigned short udp_checksum; // Udp checksum (optional)
 } UDP_HDR;
 
-
 /*******************************class declaration**************************************/
 /*******************************class portlist**************************************/
+
 class portlist{
 private:
 vector<int> port;
@@ -220,7 +209,7 @@ string portlist::getservice(int pt){
        }
    }
    if(temp==-1){
-       return "undefined";
+       return "undef";
    }else{
        return serv.at(temp);
    }
@@ -443,7 +432,7 @@ void data::add(int ports,int portd,in_addr adr_s,in_addr adr_d,int packetsize){
     }
     inf.add(serv,packetsize);
     
-    if(serv=="undefined"){
+    if(serv=="undef"){
         undefined.push_back(adrs);
     }
 }

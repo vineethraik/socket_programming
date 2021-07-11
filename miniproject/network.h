@@ -209,7 +209,7 @@ string portlist::getservice(int pt){
        }
    }
    if(temp==-1){
-       return "undefined";
+       return "undef";
    }else{
        return serv.at(temp);
    }
