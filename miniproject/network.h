@@ -18,23 +18,6 @@ int t1=0,i;
 
 using namespace std;
 
-string exec(const char* cmd) {
-    char buffer[128];
-    string result = "";
-    FILE* pipe = popen(cmd, "r");
-    if (!pipe) throw std::runtime_error("popen() failed!");
-    try {
-        while (fgets(buffer, sizeof buffer, pipe) != NULL) {
-            result += buffer;
-        }
-    } catch (...) {
-        pclose(pipe);
-        throw;
-    }
-    pclose(pipe);
-    return result;
-}
-
 void cls(HANDLE hConsole)
 {
     CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -85,8 +68,6 @@ capture_data capture(SOCKET);
 int get_protocol(capture_data);
 void gettcpdata(capture_data,data*);
 void getudpdata(capture_data,data*);
-string getservicebyport(int);
-string get_service_by_port(int,int);
 
 /*******************************IP headder**************************************/
 
@@ -432,7 +413,7 @@ void data::add(int ports,int portd,in_addr adr_s,in_addr adr_d,int packetsize){
     }
     inf.add(serv,packetsize);
     
-    if(serv=="undefined"){
+    if(serv=="undef"){
         undefined.push_back(adrs);
     }
 }
@@ -600,20 +581,6 @@ void getudpdata(capture_data c_d,data *d){
     dest,
     c_d.packet_size
     );
-
-}
-
-/*******************************function getservicebyport**************************************/
-
-string getservicebyport(int port){
-
-    WSADATA wsaData;
-    WORD dllversion=MAKEWORD(2,1);
-    if(( i=WSAStartup(dllversion,&wsaData))!=0)printf("wsa startup error %d",i), ExitProcess(EXIT_FAILURE);
-
-    char *buffer;
-    buffer = getservbyport(htons(port),NULL)->s_name;
-    return buffer;
 
 }
 
