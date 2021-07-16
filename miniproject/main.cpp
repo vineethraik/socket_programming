@@ -110,9 +110,12 @@ int main(){
         cls(hStdout);
         c_info.print();
         d.inf.print();
+        d.print_undefined();
     }
 
     cout<<"\n";
+    d.sort();
+    d.save_to_file("log.txt");
     closesocket(sock);
 	WSACleanup();
 	return 0;
