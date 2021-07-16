@@ -18,44 +18,6 @@ int t1=0,i;
 
 using namespace std;
 
-void cls(HANDLE hConsole)
-{
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-    SMALL_RECT scrollRect;
-    COORD scrollTarget;
-    CHAR_INFO fill;
-
-    // Get the number of character cells in the current buffer.
-    if (!GetConsoleScreenBufferInfo(hConsole, &csbi))
-    {
-        return;
-    }
-
-    // Scroll the rectangle of the entire buffer.
-    scrollRect.Left = 0;
-    scrollRect.Top = 0;
-    scrollRect.Right = csbi.dwSize.X;
-    scrollRect.Bottom = csbi.dwSize.Y;
-
-    // Scroll it upwards off the top of the buffer with a magnitude of the entire height.
-    scrollTarget.X = 0;
-    scrollTarget.Y = (SHORT)(0 - csbi.dwSize.Y);
-
-    // Fill with empty spaces with the buffer's default text attribute.
-    fill.Char.UnicodeChar = TEXT(' ');
-    fill.Attributes = csbi.wAttributes;
-
-    // Do the scroll
-    ScrollConsoleScreenBuffer(hConsole, &scrollRect, NULL, scrollTarget, &fill);
-
-    // Move the cursor to the top left corner too.
-    csbi.dwCursorPosition.X = 0;
-    csbi.dwCursorPosition.Y = 0;
-
-    SetConsoleCursorPosition(hConsole, csbi.dwCursorPosition);
-}
-
-/*******************************class and function declaration**************************************/
 
 class portlist;
 class addr;
@@ -68,9 +30,9 @@ capture_data capture(SOCKET);
 int get_protocol(capture_data);
 void gettcpdata(capture_data,data*);
 void getudpdata(capture_data,data*);
+void cls(HANDLE);
 
 /*******************************IP headder**************************************/
-
 typedef struct ip_hdr
 {
 	unsigned char ip_header_len:4; // 4-bit header length (in 32-bit words) normally=5 (Means 20 Bytes may be 24 also)
@@ -95,7 +57,6 @@ typedef struct ip_hdr
 } IPV4_HDR;
 
 /*******************************TCP headder**************************************/
-
 typedef struct tcp_header
 {
 	unsigned short source_port; // source port
@@ -128,7 +89,6 @@ typedef struct tcp_header
 } TCP_HDR;
 
 /*******************************UDP headder**************************************/
-
 typedef struct udp_hdr
 {
 	unsigned short source_port; // Source port no.
@@ -137,9 +97,7 @@ typedef struct udp_hdr
 	unsigned short udp_checksum; // Udp checksum (optional)
 } UDP_HDR;
 
-/*******************************class declaration**************************************/
 /*******************************class portlist**************************************/
-
 class portlist{
 private:
 vector<int> port;
@@ -178,8 +136,6 @@ port.push_back(5353);
 serv.push_back("mDNS");
 port.push_back(5355);
 serv.push_back("LLMNR");
-
-
 }
 
 string portlist::getservice(int pt){
@@ -197,6 +153,7 @@ string portlist::getservice(int pt){
 
 
 }
+
 /*******************************class capture_info**************************************/
 class capture_info{
     public:
@@ -224,7 +181,6 @@ printf("|TCP : %d |UDP : %d |ICMP : %d |IGMP : %d |OTHER %d |TOTAL %d",tcp,udp,i
 }
 
 /*******************************class capture_data**************************************/
-
 class capture_data{
     public:
     char *buffer;
@@ -233,7 +189,6 @@ class capture_data{
 };
 
 /*******************************CLASS  addr**************************************/
-
 class addr{
     private:
     in_addr src;
@@ -249,7 +204,6 @@ class addr{
 };
 
 /*******************************CLASS  store**************************************/
-
 class store{
     private:
     int len;
@@ -263,7 +217,6 @@ class store{
 };
 
 /*******************************class declaration**************************************/
-
 class info{
     private:
     vector<string> serv;
@@ -322,7 +275,6 @@ void info::print(){
 }
 
 /*******************************CLASS  data**************************************/
-
 class data{
     private:
     int len;
@@ -492,7 +444,6 @@ void data::save_to_file(string filename){
 }
 
 /*******************************function capture**************************************/
-
 capture_data capture(SOCKET sock)
 {
 	capture_data c_d;
@@ -520,7 +471,6 @@ capture_data capture(SOCKET sock)
 }
 
 /*******************************function get_protocol**************************************/
-
 int get_protocol(capture_data d){
     IPV4_HDR *iphdr;
     iphdr=(IPV4_HDR *)d.buffer;
@@ -530,7 +480,6 @@ int get_protocol(capture_data d){
 }
 
 /*******************************function gettcpdata**************************************/
-
 void gettcpdata(capture_data c_d,data *d){
     IPV4_HDR *iphdr;
     TCP_HDR *tcphdr;
@@ -557,7 +506,6 @@ void gettcpdata(capture_data c_d,data *d){
 }
 
 /*******************************function getudpdata**************************************/
-
 void getudpdata(capture_data c_d,data *d){
     IPV4_HDR *iphdr;
     UDP_HDR *udphdr;
@@ -585,3 +533,41 @@ void getudpdata(capture_data c_d,data *d){
 }
 
 /*******************************function get_service_by_port**************************************/
+void cls(HANDLE hConsole)
+{
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    SMALL_RECT scrollRect;
+    COORD scrollTarget;
+    CHAR_INFO fill;
+
+    // Get the number of character cells in the current buffer.
+    if (!GetConsoleScreenBufferInfo(hConsole, &csbi))
+    {
+        return;
+    }
+
+    // Scroll the rectangle of the entire buffer.
+    scrollRect.Left = 0;
+    scrollRect.Top = 0;
+    scrollRect.Right = csbi.dwSize.X;
+    scrollRect.Bottom = csbi.dwSize.Y;
+
+    // Scroll it upwards off the top of the buffer with a magnitude of the entire height.
+    scrollTarget.X = 0;
+    scrollTarget.Y = (SHORT)(0 - csbi.dwSize.Y);
+
+    // Fill with empty spaces with the buffer's default text attribute.
+    fill.Char.UnicodeChar = TEXT(' ');
+    fill.Attributes = csbi.wAttributes;
+
+    // Do the scroll
+    ScrollConsoleScreenBuffer(hConsole, &scrollRect, NULL, scrollTarget, &fill);
+
+    // Move the cursor to the top left corner too.
+    csbi.dwCursorPosition.X = 0;
+    csbi.dwCursorPosition.Y = 0;
+
+    SetConsoleCursorPosition(hConsole, csbi.dwCursorPosition);
+}
+
+/*******************************function       **************************************/
