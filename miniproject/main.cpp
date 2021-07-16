@@ -10,16 +10,15 @@ data d;
 int j;
 SOCKET sock;
 int main(){
-    //
+    //gathering stdout information to later clear the screen
     HANDLE hStdout;
     hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
 
 
+    //variables to save interface information
     char hostname[100];
     struct hostent *local;
     struct in_addr addr;
-
-    int in;
 
     //wsa startup mandatary step for opening socket
     WSADATA wsaData;
@@ -51,6 +50,7 @@ int main(){
 	}
 
 	printf("Enter the interface number you would like to sniff : ");
+    int in;
 	scanf("%d",&in);
 
     //binding to chosed interface
@@ -79,16 +79,9 @@ int main(){
     data d;
     memcpy(&d.host.s_addr,local->h_addr_list[in],sizeof(d.host.s_addr));
     j=0;
-
-    //cout<<exec("ipconfig")<<"\n";
-    //cout<<exec("hostname")<<"\n";
-
-   
     
+    cls(hStdout);
 
-cls(hStdout);
-
-    
     while(!kbhit()){
         j++;
         c_d=capture(sock);
@@ -115,17 +108,11 @@ cls(hStdout);
         break;
         }
         cls(hStdout);
-       //printf("\033[%d;%dH", 0, 0);
         c_info.print();
         d.inf.print();
-        //d.print_undefined();
     }
 
     cout<<"\n";
-    d.sort();
-    //d.save_to_file("log.txt");
-    //d.print();
-
     closesocket(sock);
 	WSACleanup();
 	return 0;
