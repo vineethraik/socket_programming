@@ -79,8 +79,6 @@ int main(){
     data d;
     memcpy(&d.host.s_addr,local->h_addr_list[in],sizeof(d.host.s_addr));
     j=0;
-    
-    cls(hStdout);
 
     while(!kbhit()){
         j++;
