@@ -216,7 +216,7 @@ class store{
     friend class data;
 };
 
-/*******************************class declaration**************************************/
+/*******************************class info**************************************/
 class info{
     private:
     vector<string> serv;
@@ -389,7 +389,6 @@ void data::print(){
 
 void data::print_undefined(){
     for(int i=0;i<undefined.size();i++){
-        printf("*****************************************************************\n");
         cout<<"|source:"<<inet_ntoa(undefined.at(i).src);
         cout<<" |destination:"<<inet_ntoa(undefined.at(i).dest);
         cout<<" |source port:"<<undefined.at(i).ports;
@@ -532,7 +531,7 @@ void getudpdata(capture_data c_d,data *d){
 
 }
 
-/*******************************function get_service_by_port**************************************/
+/*******************************function cls**************************************/
 void cls(HANDLE hConsole)
 {
     CONSOLE_SCREEN_BUFFER_INFO csbi;
