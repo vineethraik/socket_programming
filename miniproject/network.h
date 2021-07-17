@@ -265,11 +265,18 @@ void info::add(string service,int data_size){
 
 void info::print(){
     if(!serv.size()==0){
-    printf("\n\t packet\t\t data\n");
+    printf("\n\t   packet\t\t  data\n");
+    printf("\t %%\t\tcount\t\t %%\t\tcount\n");
     printf("*****************************************************************************************\n");
     }
     for(int i=0;i<serv.size();i++){
-        printf("%s\t%.1f%%\t\t%.1f%%\n",serv[i].c_str(),100*p_count[i]/(float)total_p_count,100*d_count[i]/(float)total_d_count);
+        printf("%s\t:%.1f%%\t\t%d\t\t%.1f\t\t%d Bytes\n",
+        serv[i].c_str(),
+        100*p_count[i]/(float)total_p_count,
+        p_count[i],
+        100*d_count[i]/(float)total_d_count,
+        d_count[i]
+        );
         printf("*****************************************************************************************\n");
     }
 }
