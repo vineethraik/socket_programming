@@ -10,6 +10,7 @@
 #include<string>
 #include<malloc.h>
 
+
 // include -lWs2_32 in g++
 // last seen 
 #define SIO_RCVALL _WSAIOW(IOC_VENDOR,1)
@@ -224,6 +225,7 @@ class info{
     vector<int> d_count;
     int total_p_count;
     int total_d_count;
+    char* datainbytes(int);
     public:
     info();
     void add(string,int);
@@ -270,15 +272,41 @@ void info::print(){
     printf("*****************************************************************************************\n");
     }
     for(int i=0;i<serv.size();i++){
-        printf("%s\t:%.1f%%\t\t%d\t\t%.1f\t\t%d Bytes\n",
+        printf("%s\t:%.1f%%\t\t%d\t\t%.1f\t\t%s\n",
         serv[i].c_str(),
         100*p_count[i]/(float)total_p_count,
         p_count[i],
         100*d_count[i]/(float)total_d_count,
-        d_count[i]
+        datainbytes(d_count[i])
         );
         printf("*****************************************************************************************\n");
     }
+}
+
+char* info::datainbytes(int data){
+int state=0;
+float tempf=(float)data;
+char* temps;
+string s;
+while(tempf>1024){
+    state++;
+    tempf/1024.0;
+}
+
+//snprintf(temps,10 , "%.2f", tempf);
+string st="%.3f";
+switch(state)
+{
+    case 0:strcat(temps," Bytes");
+    break;
+    case 1:strcat(temps," KBytes");
+    break;
+    case 2:strcat(temps," MBytes");
+    break;
+    case 3:strcat(temps," GBytes");
+    break;
+}
+return temps;
 }
 
 /*******************************CLASS  data**************************************/
