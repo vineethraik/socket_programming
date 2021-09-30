@@ -339,7 +339,6 @@ void data::add(int ports,int portd,in_addr adr_s,in_addr adr_d,int packetsize){
                 adrs.portd=portd;
                 adrs.ports=ports;
                 adrs.servicename=serv;
-                //adrs.servicename=(inet_ntoa(host)==inet_ntoa(adr_s))?getservicebyport(ports):getservicebyport(portd);
                 stores.at(i).adr.push_back(adrs);
                 stores.at(i).len++;
                 i=0;
@@ -355,7 +354,6 @@ void data::add(int ports,int portd,in_addr adr_s,in_addr adr_d,int packetsize){
             adrs.portd=portd;
             adrs.ports=ports;
             adrs.servicename=serv;
-            //adrs.servicename=(inet_ntoa(host)==inet_ntoa(adr_s))?getservicebyport(ports):getservicebyport(portd);
             st.adr.push_back(adrs);
             st.len++;
             len++;
